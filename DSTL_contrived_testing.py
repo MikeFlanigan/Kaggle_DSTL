@@ -10,8 +10,8 @@ from keras.constraints import maxnorm
 import keras
 
 # fix random seed for reproducible testing
-seed = 7
-np.random.seed(seed)
+##seed = 7
+##np.random.seed(seed)
 
 black = (0,0,0)
 white = (255,255,255)
@@ -19,8 +19,8 @@ blue = (255,0,0)
 green = (0,255,0)
 red = (0,0,255)
 
-im_w = 10
-im_h = 10
+im_w = 40
+im_h = 40
 
 blank_target = np.zeros((im_h,im_w,3))
 blank_target[:,:,:]=255
@@ -34,8 +34,11 @@ def rpt(img, X):
     
 
 def add_target(img):
-    pts = np.array([[rpt(img,0),rpt(img,1)],[rpt(img,0),rpt(img,1)],[rpt(img,0),rpt(img,1)],[rpt(img,0),rpt(img,1)]])
-    cv2.fillPoly(img, [pts],green)
+##    pts = np.array([[rpt(img,0),rpt(img,1)],[rpt(img,0),rpt(img,1)],[rpt(img,0),rpt(img,1)],[rpt(img,0),rpt(img,1)]])
+##    pts = np.array([[0,0],[10,0],[10,10],[0,10]]) # hard coding an actual shape
+##    cv2.fillPoly(img, [pts],green)
+    cv2.rectangle(img,(3,3),(20,20),green,-1)
+##    cv2.rectangle(img,(rpt(img,0),rpt(img,1)),(rpt(img,0),rpt(img,1)),green,-1)
 
 cv2.namedWindow('win',cv2.WINDOW_NORMAL)
 cv2.resizeWindow('win',50,50)
@@ -44,15 +47,15 @@ add_target(blank_target)
 ##cv2.imshow('win',blank_target)
 ##cv2.waitKey(0)
 
-X = np.zeros((10*10,10,10,3))
+X = np.zeros((im_w*im_h,im_h,im_w,3))
 X[0:X.shape[0]]=blank_target
 
 # horribly inefficient way of creating pixel of interest input data
-X2 = np.zeros((10*10,2))
+X2 = np.zeros((im_w*im_h,2))
 ii = 0
 n=0
-for i in np.arange(10*10):
-    if i > 0 and np.mod(i,10)==0:
+for i in np.arange(im_w*im_h):
+    if i > 0 and np.mod(i,im_h)==0:
         ii +=1
         n=0
     X2[i,:]= [ii,n]
@@ -66,7 +69,7 @@ cv2.waitKey(100)
 
 mask[mask==255]=1
 ##Y = mask.flatten()
-Y = np.reshape(mask,(100,))
+Y = np.reshape(mask,(im_w*im_h,))
 
 ##sys.exit()
 print('X shape:',X.shape,'X2 shape',X2.shape,'Y shape',Y.shape)
@@ -102,8 +105,29 @@ sixtyP = int(np.floor(X.shape[0]*.6))
 twentyP = int(np.floor(X.shape[0]*.2))
 ##fiveP = 
 
-pos_list = [55, 64, 65, 73, 74, 75, 84, 85, 86]
-neg_list = [0, 10, 19, 34, 38, 50, 61, 77, 88, 91]
+
+
+pos_vals = np.where(Y==1)[0]
+neg_vals = np.where(Y==0)[0]
+
+if len(pos_vals)<len(neg_vals): smaller_class = pos_vals
+else: smaller_class = neg_vals
+
+pos_list = []
+indx = np.arange(len(pos_vals))
+np.random.shuffle(indx)
+for i in np.arange(int(len(smaller_class)*3/4)):
+    pos_list.append(pos_vals[indx[i]])
+
+neg_list = []
+indx = np.arange(len(neg_vals))
+np.random.shuffle(indx)
+for i in np.arange(int(len(smaller_class)*3/4)):
+    neg_list.append(neg_vals[indx[i]])
+    
+
+##pos_list = [55, 64, 65, 73, 74, 75, 84, 85, 86]
+##neg_list = [0, 10, 19, 34, 38, 50, 61, 77, 88, 91]
 X_train = X[pos_list+neg_list,:]
 X2_train = X2[pos_list+neg_list,:]
 Y_train = np.resize(Y[pos_list+neg_list],(len(pos_list)+len(neg_list),1))
@@ -156,13 +180,14 @@ class cust_callback(keras.callbacks.Callback):
 history = cust_callback()
 
 # define model
-img_height,img_width = 10,10
 img_model = Sequential()
-img_model.add(Convolution2D(8, 3, 3, input_shape=(img_height,img_width, 3)))
+img_model.add(Convolution2D(8, 3, 3, input_shape=(im_h,im_w, 3)))
 ##img_model.add(MaxPooling2D(pool_size=(2, 2)))
 img_model.add(Activation('relu'))
+img_model.add(Convolution2D(8, 3, 3))
+img_model.add(Activation('relu'))
 img_model.add(Flatten())
-img_model.add(Dense(10,init='uniform'))
+img_model.add(Dense(im_w*im_h,init='uniform'))
 img_model.add(Activation('relu'))
 
 pixel_model = Sequential()
@@ -172,7 +197,7 @@ merged = Merge([img_model, pixel_model], mode='concat')
 
 final_model = Sequential()
 final_model.add(merged)
-final_model.add(Dense(10, activation='relu'))
+final_model.add(Dense(im_w*im_h, activation='relu'))
 final_model.add(Dense(1))
 final_model.add(Activation('sigmoid'))
 
@@ -186,7 +211,7 @@ try:
                 Y_train,
                 validation_data = ([X_val,X2_val],Y_val),
                 batch_size=8,
-                nb_epoch=600, ## begins overfitting around epoch 600, should implement check points and also take some screen shots!
+                nb_epoch=50, ## begins overfitting around epoch 600, should implement check points and also take some screen shots!
                 verbose = 0,
                 callbacks=[history])
 except KeyboardInterrupt:
@@ -218,7 +243,7 @@ plt.plot(history.val_loss, 'r',label='val loss')
 plt.legend()
 plt.show()
 
-print('class dist stats',sum(Y_train),' pos', len(Y_train)-sum(Y_train),'neg')
+print('training class dist stats',sum(Y_train),' pos', len(Y_train)-sum(Y_train),'neg')
 # --- output evaluation results -----------
 dec_thresh = 0.5
 print('TRAINING SET RESULTS:')
@@ -255,7 +280,7 @@ cv2.waitKey(1)
 ##predictions[predictions>.5]=1
 ##predictions[predictions<=.5]=0
 
-pred_img = np.reshape(predictions,(10,10))
+pred_img = np.reshape(predictions,(im_h,im_w))
 plt.figure(fig_num)
 fig_num+=1
 plt.title('test predictions')
@@ -269,7 +294,7 @@ fig_num+=1
 plt.title('thresholded predictions')
 plt.imshow(t_pred_img)
 
-true_img = np.reshape(Y_test,(10,10))
+true_img = np.reshape(Y_test,(im_h,im_w))
 plt.figure(fig_num)
 fig_num+=1
 plt.title('ground truth')
