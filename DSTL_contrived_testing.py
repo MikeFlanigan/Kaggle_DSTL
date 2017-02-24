@@ -10,8 +10,8 @@ from keras.constraints import maxnorm
 import keras
 
 # fix random seed for reproducible testing
-##seed = 7
-##np.random.seed(seed)
+seed = 7
+np.random.seed(seed)
 
 black = (0,0,0)
 white = (255,255,255)
@@ -102,21 +102,11 @@ sixtyP = int(np.floor(X.shape[0]*.6))
 twentyP = int(np.floor(X.shape[0]*.2))
 ##fiveP = 
 
-pos_vals = np.where(Y==1)[0]
-indx = np.arange(int(len(pos_vals)/2))
-np.random.shuffle(indx)
-pos_list = pos_vals[indx]
-
-neg_vals = np.where(Y==0)[0]
-indx = np.arange(int(len(pos_vals)/2))
-np.random.shuffle(indx)
-neg_list = neg_vals[indx]
-
-train_list = np.concatenate((pos_list,neg_list),0)
-
-X_train = X[train_list,:]
-X2_train = X2[train_list,:]
-Y_train = np.resize(Y[train_list],(len(train_list),1))
+pos_list = [55, 64, 65, 73, 74, 75, 84, 85, 86]
+neg_list = [0, 10, 19, 34, 38, 50, 61, 77, 88, 91]
+X_train = X[pos_list+neg_list,:]
+X2_train = X2[pos_list+neg_list,:]
+Y_train = np.resize(Y[pos_list+neg_list],(len(pos_list)+len(neg_list),1))
 
 # re-shuffling training data
 ##indx = np.arange(X_train.shape[0]) 
