@@ -37,8 +37,8 @@ def add_target(img):
 ##    pts = np.array([[rpt(img,0),rpt(img,1)],[rpt(img,0),rpt(img,1)],[rpt(img,0),rpt(img,1)],[rpt(img,0),rpt(img,1)]])
 ##    pts = np.array([[0,0],[10,0],[10,10],[0,10]]) # hard coding an actual shape
 ##    cv2.fillPoly(img, [pts],green)
-    cv2.rectangle(img,(3,3),(20,20),green,-1)
-##    cv2.rectangle(img,(rpt(img,0),rpt(img,1)),(rpt(img,0),rpt(img,1)),green,-1)
+##    cv2.rectangle(img,(3,3),(20,20),green,-1)
+    cv2.rectangle(img,(rpt(img,0),rpt(img,1)),(rpt(img,0),rpt(img,1)),green,-1)
 
 cv2.namedWindow('win',cv2.WINDOW_NORMAL)
 cv2.resizeWindow('win',50,50)
@@ -71,7 +71,12 @@ mask[mask==255]=1
 ##Y = mask.flatten()
 Y = np.reshape(mask,(im_w*im_h,))
 
-##sys.exit()
+# save files for further testing
+cv2.imwrite('X1b_image.png',X[0,:,:,:])
+np.save('X2b_dat.npy',X2)
+np.save('Yb.npy',Y)
+
+sys.exit()
 print('X shape:',X.shape,'X2 shape',X2.shape,'Y shape',Y.shape)
 
 ####### Machine learning #######
@@ -197,7 +202,7 @@ merged = Merge([img_model, pixel_model], mode='concat')
 
 final_model = Sequential()
 final_model.add(merged)
-final_model.add(Dense(im_w*im_h, activation='relu'))
+final_model.add(Dense(10, activation='relu'))
 final_model.add(Dense(1))
 final_model.add(Activation('sigmoid'))
 
