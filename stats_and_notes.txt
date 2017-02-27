@@ -1,0 +1,49 @@
+each 'scene' has 4 images in multiple bands and pixel sizes
+
+Each scene has a unique Xmax and Ymin. Within each scene, each image will have its own transformation for the class polygons (using Xmax, yMin, and the images x and y pixel count). The polygons must be transformed 4 times, once for each image type within a scene. When making classifications, the transformations have to be done in reverse to get them back to the original scale for submission.
+
+
+
+goal:
+
+- look at frequency and area distribution of classes
+- determine top 3 classes in order of area and score importance
+	- crops
+	- trees 
+	- buildings
+
+image ID of top 3 occurances for 3 highest classes:
+	- crops
+		- 6060_2_3 94%
+		- 6150_2_3 80%
+		- 6110_4_0 80%
+	- trees
+		- 6170_0_4 30%
+		- 6010_4_4 29%
+		- 6170_4_1 26%
+	- buildings
+		- 6120_2_2 26%
+		- 6110_1_2 16%
+		- 6140_1_2 15%
+
+image ID of low (or zero) occurance for 3 highest classes:
+	- crops
+		- 6010_4_2 0%
+	- trees
+		- 6140_1_2 3.5%
+	- buildings
+		- 6010_1_2 0%
+
+
+some stats:
+
+
+
+
+
+
+
+for each class I want to know it's level of distribution across each training image, this will be helpful for training on specific images
+
+
+for each class I want to know it's total mask sum accross all training images
