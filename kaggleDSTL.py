@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import cv2
 import numpy as np
 
-six_band = True
+##six_band = True
 six_band = False
 ##cv2.namedWindow('test',cv2.WINDOW_NORMAL)
 ##cv2.resizeWindow('test',int(1920/4),int(1080/4))
@@ -18,7 +18,7 @@ trn_geojson_files = os.listdir('./train_geojson_v3')
 
 view_one_image = True
 view_in_multi = True
-this_image = '6070_2_3' 
+this_image = '6060_2_3' 
 this_image_three = './three_band/'+this_image+'.tif'
 this_image_multi = './sixteen_band/'+this_image
 

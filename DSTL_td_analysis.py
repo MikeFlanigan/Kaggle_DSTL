@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np 
-import pandas as pd 
 import cv2
 from shapely.wkt import loads as wkt_loads
 import tifffile as tiff
