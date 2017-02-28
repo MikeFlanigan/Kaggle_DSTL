@@ -142,20 +142,21 @@ win_c_inds = np.zeros((tot_indices,2))
 row = 0
 col = 0
 j = 0
-win_c_inds = np.load('win_cs.npy') # only if have an accurate saved one
-##for ii in np.arange(tot_indices):
-##    if col > 0 and np.mod(col,mask.shape[1])==0:
-##        row +=1
-##        col=0
-##        if np.mod(row,100)==0: print(row)
-##    if row > win_rows/2 and row < mask.shape[0]-win_rows/2 and col > win_cols/2 and col < mask.shape[1] - win_cols/2:
-##        win_c_inds[j,:] = np.array([row, col])
-##        j+=1
-##    col+=1
+##win_c_inds = np.load('win_cs.npy') # only if have an accurate saved one
+for ii in np.arange(tot_indices):
+    if col > 0 and np.mod(col,mask.shape[1])==0:
+        row +=1
+        col=0
+        if np.mod(row,100)==0: print(row)
+    if ((row >= win_rows/2) and row < (mask.shape[0]-win_rows/2) and (col >= win_cols/2) and col < (mask.shape[1] - win_cols/2)):
+        win_c_inds[j,:] = np.array([row, col])
+        j+=1
+    col+=1
     
-# shuffle the array
-##print('shuffling index array...')
-##np.random.shuffle(win_c_inds)
+## shuffle the array
+print('shuffling index array...')
+np.random.shuffle(win_c_inds)
+np.save('win_cs.npy',win_c_inds)
 
 # training and positives 
 # access the array and save on positive or negative
@@ -163,19 +164,22 @@ pos_dir = './data/train/positive/'
 neg_dir = './data/train/negative/'
 print('creating image patches and saving...')
 ptc = 0 # postiive training count
-ntc = 0 # negative...
-while ptc < mask.sum()*.8:
-    im_patch = twenty_chan_img[win_c_inds[ptc,0]-win_rows/2:win_c_inds[ptc,0]+win_rows/2,win_c_inds[ptc,1]-win_cols/2:win_c_inds[ptc,1]+win_cols/2,:]
-    if mask[int(win_c_inds[ptc,0]),int(win_c_inds[ptc,1])]==1:
+ntc = 0 # negative training count
+i = 0
+##while ptc < mask.sum()*.8:
+while ptc < 100:
+    im_patch = twenty_chan_img[int(win_c_inds[i,0]-win_rows/2):int(win_c_inds[i,0]+win_rows/2),int(win_c_inds[i,1]-win_cols/2):int(win_c_inds[i,1]+win_cols/2),:]
+    if mask[int(win_c_inds[i,0]),int(win_c_inds[i,1])]==1 and ptc < 100:
         tiff.imsave(pos_dir+one_image+'_'+str(ptc)+'.tif',im_patch)
 ##        cv2.imwrite(pos_dir+one_image+'_'+str(ptc)+'.jpg',im_patch)
         ptc+=1
-    elif mask[int(win_c_inds[ptc,0]),int(win_c_inds[ptc,1])]==0:
+    elif mask[int(win_c_inds[i,0]),int(win_c_inds[i,1])]==0 and ntc < 100:
         tiff.imsave(neg_dir+one_image+'_'+str(ntc)+'.tif',im_patch)
         ntc +=1
-    else: print('ERROR MASK VAL',mask[int(win_c_inds[ptc,0]),int(win_c_inds[ptc,1])])
+    else: print('ERROR MASK VAL',mask[int(win_c_inds[i,0]),int(win_c_inds[i,1])])
     if np.mod(ptc,100)==0: print('ptc:',ptc)
     if np.mod(ntc,100)==0:print('ntc:',ntc)
+    i+=1
     
 ##for row in np.arange(mask.shape[1]):
 ##    for col in np.arange(mask.shape[0]):
